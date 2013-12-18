@@ -12,15 +12,20 @@ package n.loader.items {
 	public class SoundItem extends LoadingItem {
 		
 		private var sound:Sound;
+		private var context:SoundLoaderContext;
 		
 		public function SoundItem(_request:URLRequest, _id:String) {
 			super(_request, _id);
 		}
 		
+		public function setContext(_context:SoundLoaderContext):void {
+			context = _context;
+		}
+		
 		public override function load():void {
 			super.load();
 			
-			sound = new Sound(request, new SoundLoaderContext(1000));
+			sound = new Sound(request, context);
 			sound.addEventListener(Event.COMPLETE, onLoadComplete);
 			sound.addEventListener(IOErrorEvent.IO_ERROR, onError);
 			
@@ -38,8 +43,10 @@ package n.loader.items {
 		protected override function removeListeners():void {
 			super.removeListeners();
 			
-			sound.removeEventListener(Event.COMPLETE, onLoadComplete);
-			sound.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+			if (sound) {
+				sound.removeEventListener(Event.COMPLETE, onLoadComplete);
+				sound.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+			}
 		}
 		
 		protected override function onError(e:ErrorEvent):void {

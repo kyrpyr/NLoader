@@ -4,6 +4,7 @@ package n.loader.items {
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLRequest;
+	import flash.system.LoaderContext;
 	/**
 	 * ...
 	 * @author N
@@ -11,9 +12,14 @@ package n.loader.items {
 	public class DisplayItem extends LoadingItem {
 		
 		private var loader:Loader;
+		private var context:LoaderContext;
 		
 		public function DisplayItem(_request:URLRequest, _id:String) {
 			super(_request, _id);
+		}
+		
+		public function setContext(_context:LoaderContext):void {
+			context = _context;
 		}
 		
 		public override function load():void {
@@ -22,7 +28,7 @@ package n.loader.items {
 			loader = new Loader();
 			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
 			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onError);
-			loader.load(request);
+			loader.load(request, context);
 		}
 		
 		public override function cancel():void {
@@ -36,8 +42,10 @@ package n.loader.items {
 		protected override function removeListeners():void {
 			super.removeListeners();
 			
-			loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
-			loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+			if (loader) {
+				loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
+				loader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+			}
 		}
 		
 		protected override function onLoadComplete(e:Event):void {

@@ -5,6 +5,7 @@ package n.loader.items {
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
+	import flash.utils.setTimeout;
 	
 	/**
 	 * ...
@@ -18,11 +19,12 @@ package n.loader.items {
 		
 		public var id:String;
 		public var is_loaded:Boolean = false;
+		public var is_can_playing:Boolean = false;	//only for VideoItem
 		public var content:*;
 		
-		protected var request:URLRequest;
+		public var request:URLRequest;
 		
-		private var dummy_listener:Sprite = new Sprite();
+		private var dummy_listener:Sprite = new Sprite();	//for progress
 		
 		public function LoadingItem(_request:URLRequest, _id:String) {
 			id = _id;
@@ -35,6 +37,17 @@ package n.loader.items {
 		
 		public function cancel():void {
 			removeListeners();
+		}
+		
+		/*public function dispose():void {
+			cancel();
+			
+		}*/
+		
+		public function dispatchOnNextFrame(_event_to_dispatch:Event):void {
+			setTimeout(function():void {
+				dispatchEvent(_event_to_dispatch);
+			}, 1)
 		}
 		
 		public function get bytes_loaded():int {

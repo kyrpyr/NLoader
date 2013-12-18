@@ -44,9 +44,11 @@ package n.loader.items {
 		protected override function removeListeners():void {
 			super.removeListeners();
 			
-			loader.removeEventListener(Event.COMPLETE, onLoadComplete);
-			loader.removeEventListener(IOErrorEvent.IO_ERROR, onError);
-			loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onError);
+			if (loader) {
+				loader.removeEventListener(Event.COMPLETE, onLoadComplete);
+				loader.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+				loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onError);
+			}
 		}
 		
 		protected override function onLoadComplete(e:Event):void {

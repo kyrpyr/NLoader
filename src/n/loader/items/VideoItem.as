@@ -40,6 +40,7 @@ package n.loader.items {
 			metadata = o;
 			content = stream;
 			stream.pause();
+			is_can_playing = true;
 			dispatchEvent(new NLoaderEvent(NLoaderEvent.CAN_BEGIN_PLAYING));
 		}
 		
