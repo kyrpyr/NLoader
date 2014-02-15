@@ -1,4 +1,6 @@
 package n.loader.items {
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
@@ -37,6 +39,13 @@ package n.loader.items {
 			try {
 				loader.close()
 			} catch (e:Error) { };
+		}
+		
+		override public function dispose():void {
+			loader.unload();
+			loader.unloadAndStop();
+			if (content is Bitmap) (content as Bitmap).bitmapData.dispose();
+			super.dispose();
 		}
 		
 		protected override function removeListeners():void {

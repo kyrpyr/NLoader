@@ -31,19 +31,31 @@ package n.loader.items {
 			request = _request;
 		}
 		
+		/**
+		 * @private
+		 */
 		public function load():void {
 			dummy_listener.addEventListener(Event.ENTER_FRAME, onLoadProgress);	//check progress
 		}
 		
+		/**
+		 * @private
+		 */
 		public function cancel():void {
 			removeListeners();
 		}
 		
-		/*public function dispose():void {
+		/**
+		 * @private
+		 */
+		public function dispose():void {
 			cancel();
-			
-		}*/
+			content = null;
+		}
 		
+		/**
+		 * @private
+		 */
 		public function dispatchOnNextFrame(_event_to_dispatch:Event):void {
 			setTimeout(function():void {
 				dispatchEvent(_event_to_dispatch);

@@ -32,7 +32,7 @@ package n.loader {
 		
 		public const VERSION:String = "v0.13";
 		
-		private const type_classes:Object = { 
+		private static const type_classes:Object = { 
 			image:DisplayItem, 
 			swf:DisplayItem, 
 			xml:URLLoaderItem, 
@@ -102,30 +102,39 @@ package n.loader {
 			if (!is_paused && !is_running) loadNext();
 			return _item
 		}
+
+		/**
+		 * Cancel item with <code>id == _id</code>. If <code>_id</code> unknown, cancel all not loaded items and clear queue.
+		 * Before calling this method you must unsubscribe removed items from listeners.
+		 * If item already loaded, nothing happened (use <code>dispose(_id)</code> to delete them).
+		 * @param	_id
+		 */
+		public function cancel(_id:String = null):void {
+			if (_id) {
+				cancelItem(_id);
+			} else {
+				cancelAll();
+			}
+		}
 		
 		/**
-		 * Cancel load and clear queue. All not loaded items will be removed. 
-		 * Before calling this method you must unsubscribe not loaded items from listeners.
+		 * Delete item with <code>id == _id</code>. If <code>_id</code> not set, delete all items and get them ready for garbage collector.
+		 * @param	_id
 		 */
-		public function cancel():void {
-			if (_current_item) {
-				_current_item.cancel();
-				_current_item = null;
-			}
-			queue = new Vector.<String>();
-			
-			var _item:LoadingItem;
-			for (var i:int = 0; i < items.length; i++) {
-				_item = items[i];
-				if (!_item.is_loaded) {
-					_item.cancel();
-					items.splice(i, 1);
-				}
+		public function dispose(_id:String = null):void {
+			if (_id) {
+				disposeItem(_id);
+			} else {
+				disposeAll();
 			}
 		}
 		
 		public function get current_item():LoadingItem {
 			return _current_item
+		}
+		
+		public function get queue_length():uint {
+			return queue.length
 		}
 		
 		public function get(_id:String):LoadingItem {
@@ -237,6 +246,66 @@ package n.loader {
 		private function removeListeners(_item:LoadingItem):void {
 			_item.removeEventListener(Event.COMPLETE, onItemComplete);
 			_item.removeEventListener(ErrorEvent.ERROR, onError);
+		}
+		
+		private function cancelItem(_id:String):void {
+			var _item:LoadingItem;
+			for (var i:int = 0; i < items.length; i++) {
+				_item = items[i];
+				if (_item.id == _id) {
+					if (!_item.is_loaded) {
+						_item.cancel();
+						removeListeners(_item);
+						items.splice(i, 1);
+						if (_item == _current_item) {
+							loadNext();
+						} else {
+							queue.splice(queue.indexOf(_id), 1);
+						}
+					}
+					return
+				}
+			}
+		}
+		
+		private function cancelAll():void {
+			if (_current_item) _current_item = null;
+			queue = new Vector.<String>();
+			is_running = false;
+			
+			var _item:LoadingItem;
+			for (var i:int = 0; i < items.length; i++) {
+				_item = items[i];
+				if (!_item.is_loaded) {
+					removeListeners(_item);
+					_item.cancel();
+					items.splice(i, 1);
+				}
+			}
+		}
+		
+		private function disposeItem(_id:String):void {
+			var _item:LoadingItem;
+			for (var i:int = 0; i < items.length; i++) {
+				_item = items[i];
+				if (_item.id == _id) {
+					if (_item.is_loaded) {
+						_item.dispose();
+						items.splice(i, 1);
+					} else {
+						cancelItem(_id);
+					}
+					return
+				}
+			}
+		}
+		
+		private function disposeAll():void {
+			cancelAll();
+			for (var i:int = 0; i < items.length; i++) {
+				items[i].dispose();
+			}
+			items = new Vector.<LoadingItem>();
 		}
 		
 	}
